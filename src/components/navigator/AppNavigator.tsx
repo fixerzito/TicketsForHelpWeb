@@ -4,10 +4,11 @@ import { Button } from 'primereact/button';
 import { CustomersViewComponent } from '../customer/CustomersViewComponent';
 import { TicketsViewComponent } from '../ticket/TicketViewComponent';
 import { HomeComponent } from '../home/HomeComponent';
+import { EmployeeViewComponent } from '../employee/EmployeeViewComponent';
 
 export const AppNavigator: React.FC = () => {
   const [visible, setVisible] = useState(false);
-  const [activePage, setActivePage] = useState<'home' | 'customers' | 'tickets'>('home');
+  const [activePage, setActivePage] = useState<'home' | 'customers' | 'employees' | 'tickets'>('home');
 
   const renderPage = () => {
     switch (activePage) {
@@ -15,6 +16,8 @@ export const AppNavigator: React.FC = () => {
         return <HomeComponent setActivePage={setActivePage} />;
       case 'customers':
         return <CustomersViewComponent />;
+      case 'employees':
+        return <EmployeeViewComponent />;
       case 'tickets':
         return <TicketsViewComponent />;
       default:
@@ -59,6 +62,14 @@ export const AppNavigator: React.FC = () => {
             className="p-button-text w-full"
             onClick={() => {
               setActivePage('tickets');
+              setVisible(false);
+            }}
+          />
+          <Button
+            label="Employees"
+            className="p-button-text w-full"
+            onClick={() => {
+              setActivePage('employees');
               setVisible(false);
             }}
           />
