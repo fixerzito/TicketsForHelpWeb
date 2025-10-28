@@ -19,7 +19,7 @@ export const EmployeeInsertDialog: React.FC<Props> = ({ visible, onHide, onCreat
     login: '',
     email: '',
     password: '',
-    photo: '' // apenas o nome do arquivo
+    photo: ''
   });
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export const EmployeeInsertDialog: React.FC<Props> = ({ visible, onHide, onCreat
         </div>
         <div className="p-field">
           <label htmlFor="photo">Foto</label>
-          <input id="photo" type="file" accept="image/*" onChange={handleFileChange} />
+          <input id="photo" type="file" accept="image/*" onChange={handleFileChange} className="p-button"/>
           {previewUrl && (
             <div style={{ marginTop: '1rem', textAlign: 'center' }}>
               <img

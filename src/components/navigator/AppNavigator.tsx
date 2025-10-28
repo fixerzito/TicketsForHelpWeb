@@ -66,7 +66,7 @@ export const AppNavigator: React.FC = () => {
             }}
           />
           <Button
-            label="Employees"
+            label="Colaboradores"
             className="p-button-text w-full"
             onClick={() => {
               setActivePage('employees');

@@ -4,6 +4,7 @@ export interface Ticket {
   issue: string;
   status: boolean;
   idCustomer: number;
+  idEmployee: number | null;
 }
 
 export interface TicketViewModel {
@@ -11,7 +12,9 @@ export interface TicketViewModel {
   name: string;
   status: boolean;
   idCustomer: number;
-  customerName?: string;
+  customer?: string;
+  idEmployee: number | null;
+  employee?: string | null;
 }
 
 export interface TicketFormInsert {
@@ -19,6 +22,7 @@ export interface TicketFormInsert {
   issue: string;
   status: boolean;
   idCustomer: number;
+  idEmployee: number | null;
 }
 
 export interface TicketFormUpdate {
@@ -27,4 +31,5 @@ export interface TicketFormUpdate {
   issue: string;
   status: boolean;
   idCustomer: number;
+  idEmployee: number | null;
 }

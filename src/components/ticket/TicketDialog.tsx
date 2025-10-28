@@ -7,6 +7,10 @@ import { ticketService } from '../../services/ticket/ticketService';
 import { customerService } from '../../services/customer/customerService';
 import { TicketFormInsert } from '../../types/ticket/Ticket';
 import { CustomerDropdownViewModel } from '../../types/customer/Customer';
+import { EmployeeDropdownViewModel } from '../../types/employee/Employee';
+import { employeeService } from '../../services/employee/employeeService';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { InputSwitch } from 'primereact/inputswitch';
 
 interface TicketDialogProps {
   visible: boolean;
@@ -29,13 +33,16 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     issue: '',
     status: true,
     idCustomer: 0,
+    idEmployee: null
   });
   const [saving, setSaving] = useState(false);
   const [customers, setCustomers] = useState<CustomerDropdownViewModel[]>([]);
+  const [employees, setEmployees] = useState<EmployeeDropdownViewModel[]>([]);
 
   useEffect(() => {
     if (visible) {
       customerService.getallDropdown().then(setCustomers).catch(console.error);
+      employeeService.getallDropdown().then(setEmployees).catch(console.error);
     }
   }, [visible]);
 
@@ -49,6 +56,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
             issue: data.issue,
             status: data.status,
             idCustomer: data.idCustomer,
+            idEmployee: data.idEmployee,
           });
         })
         .catch(console.error);
@@ -59,6 +67,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
         issue: '',
         status: true,
         idCustomer: 0,
+        idEmployee: null
       });
     }
   }, [ticketId, visible]);
@@ -89,77 +98,135 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     }
   };
 
-  return (
-    <Dialog
-      header={viewMode ? 'Detalhes do Chamado' : ticketId ? 'Editar Chamado' : 'Novo Chamado'}
-      visible={visible}
-      style={{ width: '500px', borderRadius: '10px' }}
-      onHide={onHide}
-      className="p-d-flex p-flex-column"
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div className="p-field">
-          <label>Título</label>
+return (
+  <Dialog
+    header={
+      <div className="flex items-center gap-3">
+        <i className="pi pi-ticket text-blue-500 text-2xl"></i>
+        <div>
+          <h2 className="text-xl font-semibold m-0">
+            {viewMode ? "#"+ticketId + " - "  : ticketId ? '': ''}{viewMode ? 'Detalhes do Chamado' : ticketId ? "#"+ticketId + " - " + 'Editar Chamado' : 'Novo Chamado'} 
+          </h2>
+          <span className="text-sm text-gray-500">
+            {viewMode ? 'Visualize as informações do ticket' : 'Preencha os detalhes abaixo'}
+          </span>
+        </div>
+      </div>
+    }
+    visible={visible}
+    style={{
+      width: '80vw',
+      maxWidth: '1100px',
+      borderRadius: '16px',
+      backgroundColor: '#f9fafb',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+    }}
+    onHide={onHide}
+    className="p-0"
+  >
+    <div className="p-6 bg-white rounded-lg flex flex-col gap-8">
+      {/* ===== SEÇÃO 1 ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6 items-end">
+        {/* <div>
+          <label className="text-gray-600 font-medium mb-1 block">Número</label>
+          <InputText
+            value={ticketId ? `#${ticketId}` : 'Novo Ticket'}
+            disabled
+            className="w-full border-round-md bg-gray-100 text-gray-700"
+          />
+        </div> */}
+        <div className="md:col-span-2">
+          <label className="text-gray-600 font-medium mb-1 block">Título</label>
           <InputText
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
-            placeholder="Digite o título do chamado"
+            placeholder="Digite o título"
             disabled={viewMode}
-            style={{ width: '100%', borderRadius: '6px' }}
+            className="w-full border-round-md"
           />
         </div>
-        <div className="p-field">
-          <label>Descrição</label>
-          <InputText
-            value={formData.issue}
-            onChange={(e) => handleChange('issue', e.target.value)}
-            placeholder="Descreva o problema"
-            disabled={viewMode}
-            style={{ width: '100%', borderRadius: '6px' }}
-          />
-        </div>
-        <div className="p-field">
-          <label>Status</label>
-          <Dropdown
-            value={formData.status}
-            options={[
-              { label: 'Aberto', value: true },
-              { label: 'Fechado', value: false },
-            ]}
+        <div className="flex items-center justify-start md:justify-end gap-3 md:col-span-3">
+          <label className="font-medium text-gray-600">Status:</label>
+          <InputSwitch
+            checked={formData.status}
             onChange={(e) => handleChange('status', e.value)}
             disabled={viewMode}
-            style={{ width: '100%', borderRadius: '6px' }}
           />
+          <span
+            className={`text-sm font-semibold px-3 py-1 rounded-full ${
+              formData.status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            }`}
+          >
+            {formData.status ? 'Aberto' : 'Fechado'}
+          </span>
         </div>
-        <div className="p-field">
-          <label>Cliente</label>
+      </div>
+
+      {/* ===== SEÇÃO 2 ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6">
+        <div>
+          <label className="text-gray-600 font-medium mb-1 block">Cliente</label>
           <Dropdown
             value={formData.idCustomer}
-            options={customers.map(c => ({ label: c.name, value: c.id }))}
+            options={customers.map((c) => ({ label: c.name, value: c.id }))}
             onChange={(e) => handleChange('idCustomer', e.value)}
             placeholder="Selecione um cliente"
             disabled={viewMode}
-            style={{ width: '100%', borderRadius: '6px' }}
+            className="w-full border-round-md"
           />
         </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
-          <Button
-            label={viewMode ? 'Fechar' : 'Cancelar'}
-            className="p-button-text"
-            onClick={onHide}
-            disabled={saving}
+        <div>
+          <label className="text-gray-600 font-medium mb-1 block">Colaborador</label>
+          <Dropdown
+            value={formData.idEmployee}
+            options={employees.map((c) => ({ label: c.name, value: c.id }))}
+            onChange={(e) => handleChange('idEmployee', e.value)}
+            placeholder="Selecione um colaborador"
+            disabled={viewMode}
+            className="w-full border-round-md"
           />
-          {!viewMode && (
-            <Button
-              label="Salvar"
-              className="p-button-success"
-              onClick={handleSave}
-              loading={saving}
-            />
-          )}
         </div>
       </div>
-    </Dialog>
-  );
+
+      {/* ===== SEÇÃO 3 ===== */}
+      <div>
+        <label className="text-gray-600 font-medium mb-1 block">Descrição</label>
+        <InputTextarea
+          value={formData.issue}
+          onChange={(e) => handleChange('issue', e.target.value)}
+          placeholder="Descreva o problema..."
+          disabled={viewMode}
+          className="w-full border-round-md"
+          rows={8}
+          autoResize
+        />
+
+        <div className="flex justify-end gap-3 pt-4 border-t">
+        <Button
+          label={viewMode ? 'Fechar' : 'Cancelar'}
+          className="p-button-text p-button-lg"
+          onClick={onHide}
+          disabled={saving}
+        />
+        {!viewMode && (
+          <Button
+            label="Salvar"
+            icon="pi pi-check"
+            className="p-button-success p-button-lg"
+            onClick={handleSave}
+            loading={saving}
+          />
+        )}
+      </div>
+      </div>
+
+      {/* ===== FOOTER ===== */}
+      
+    </div>
+  </Dialog>
+);
+
+
+
+
 };

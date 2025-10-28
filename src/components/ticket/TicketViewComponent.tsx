@@ -25,25 +25,15 @@ export const TicketsViewComponent: React.FC = () => {
   const toast = useRef<Toast>(null);
 
   useEffect(() => {
-    fetchTickets();
+    fetchTickets();                                                                                                                                          
   }, []);
 
   const fetchTickets = async () => {
     try {
       setLoading(true);
       const ticketsData = await ticketService.getAll();
-      const ticketsWithCustomerName = await Promise.all(
-        ticketsData.map(async (ticket) => {
-          try {
-            const customer = await customerService.getById(ticket.idCustomer);
-            return { ...ticket, customerName: customer.name };
-          } catch {
-            return { ...ticket, customerName: 'Cliente não encontrado' };
-          }
-        })
-      );
-      setTickets(ticketsWithCustomerName);
-      setFilteredTickets(ticketsWithCustomerName);
+      setTickets(ticketsData);
+      setFilteredTickets(ticketsData);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar tickets');
     } finally {
@@ -54,7 +44,7 @@ export const TicketsViewComponent: React.FC = () => {
   const applyFilters = () => {
     let filtered = [...tickets];
     if (filterName.trim()) filtered = filtered.filter(t => t.name.toLowerCase().includes(filterName.toLowerCase()));
-    if (filterCustomer.trim()) filtered = filtered.filter(t => t.customerName!.toLowerCase().includes(filterCustomer.toLowerCase()));
+    if (filterCustomer.trim()) filtered = filtered.filter(t => t.customer!.toLowerCase().includes(filterCustomer.toLowerCase()));
     if (filterStatus === 'open') filtered = filtered.filter(t => t.status === true);
     else if (filterStatus === 'closed') filtered = filtered.filter(t => t.status === false);
     setFilteredTickets(filtered);
@@ -170,7 +160,8 @@ export const TicketsViewComponent: React.FC = () => {
             onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
             <h3 style={{ margin: 0, color: '#3f51b5' }}>#{row.id} - {row.name}</h3>
-            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.customerName}</p>
+            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.customer}</p>
+            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.employee ?? "Nenhum funcionário atribuído"}</p>
             <span
               style={{
                 padding: '0.25rem 0.5rem',

@@ -18,6 +18,12 @@ export interface EmployeeViewModel {
     photo: string
 }
 
+export interface EmployeeDropdownViewModel {
+    id: number,
+    name: string,
+    photo: string
+}
+
 export interface EmployeeListViewModel {
     id: number,
     name: string,
@@ -45,6 +51,7 @@ export interface EmployeeFormUpdate {
 }
 
 export interface EmployeeDropdownViewModel {
+    id: number,
     name: string,
     photo: string
 }
