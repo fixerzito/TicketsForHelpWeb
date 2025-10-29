@@ -1,4 +1,4 @@
-import { Ticket, TicketFormInsert, TicketFormUpdate, TicketViewModel } from '../../types/ticket/Ticket';
+import { Ticket, TicketCriticity, TicketFormInsert, TicketFormUpdate, TicketViewModel } from '../../types/ticket/Ticket';
 import { api } from '../api';
 
 export const ticketService = {
@@ -10,15 +10,19 @@ export const ticketService = {
     const response = await api.get<Ticket>(`/tickets/${id}`);
     return response.data;
   },
+  getCriticity: async (): Promise<TicketCriticity[]> => {
+    const response = await api.get<TicketCriticity[]>('/tickets/criticity');
+    return response.data;
+  },
   insert: async (ticket: Omit<TicketFormInsert, 'id'>): Promise<TicketFormInsert> => {
     const response = await api.post<TicketFormInsert>('/tickets', ticket);
     return response.data;
   },
   update: async (id: number, dto: TicketFormInsert): Promise<TicketViewModel> => {
-  const response = await api.put<TicketViewModel>(`/tickets/${id}`, dto);
-  return response.data;
+    const response = await api.put<TicketViewModel>(`/tickets/${id}`, dto);
+    return response.data;
   },
   delete: async (id: number): Promise<void> => {
-  await api.patch(`/tickets/${id}`);
+    await api.patch(`/tickets/${id}`);
   }
 };

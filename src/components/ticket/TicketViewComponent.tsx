@@ -25,7 +25,7 @@ export const TicketsViewComponent: React.FC = () => {
   const toast = useRef<Toast>(null);
 
   useEffect(() => {
-    fetchTickets();                                                                                                                                          
+    fetchTickets();
   }, []);
 
   const fetchTickets = async () => {
@@ -82,6 +82,22 @@ export const TicketsViewComponent: React.FC = () => {
       setEditingTicket(null);
     } catch (err: any) {
       toast.current?.show({ severity: 'error', summary: 'Erro', detail: err.message || err, life: 5000 });
+    }
+  };
+
+  const handleCriticityBackground = (criticity: string) => {
+    switch (criticity) {
+      case "Low":
+        return ('#858585ff');
+        break;
+      case "Medium":
+        return ('#8e9100ff');
+        break;
+      case "High":
+        return ('#af0000ff');
+        break;
+      case "Critical":
+        return ('#000000ff');
     }
   };
 
@@ -159,9 +175,36 @@ export const TicketsViewComponent: React.FC = () => {
             onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
             onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
-            <h3 style={{ margin: 0, color: '#3f51b5' }}>#{row.id} - {row.name}</h3>
-            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.customer}</p>
-            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.employee ?? "Nenhum funcionário atribuído"}</p>
+            <div
+              style={{
+                padding: '',
+                display: 'flex',
+                marginBottom: '1vh',
+                flexDirection: 'row',
+                justifyContent: 'space-between', // 👈 joga os itens pros extremos
+                alignItems: 'center', // opcional, alinha verticalmente
+              }}
+            >
+              <h3 style={{ margin: 0, color: '#3f51b5' }}>
+                #{row.id} - {row.name}
+              </h3>
+
+              <span
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '18px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  backgroundColor: handleCriticityBackground(row.criticity),
+                  fontSize: '0.90rem',
+                }}
+              >
+                {row.criticity}
+              </span>
+            </div>
+
+
+
             <span
               style={{
                 padding: '0.25rem 0.5rem',
@@ -174,6 +217,9 @@ export const TicketsViewComponent: React.FC = () => {
             >
               {row.status ? 'Aberto' : 'Fechado'}
             </span>
+
+            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.customer}</p>
+            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.employee ?? "Nenhum funcionário atribuído"}</p>
             <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
               <Button
                 icon="pi pi-pencil"

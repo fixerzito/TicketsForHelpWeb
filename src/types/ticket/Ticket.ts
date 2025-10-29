@@ -3,6 +3,7 @@ export interface Ticket {
   name: string;
   issue: string;
   status: boolean;
+  criticity: string;
   idCustomer: number;
   idEmployee: number | null;
 }
@@ -11,6 +12,7 @@ export interface TicketViewModel {
   id: number;
   name: string;
   status: boolean;
+  criticity: string;
   idCustomer: number;
   customer?: string;
   idEmployee: number | null;
@@ -21,6 +23,7 @@ export interface TicketFormInsert {
   name: string;
   issue: string;
   status: boolean;
+  criticity: string;
   idCustomer: number;
   idEmployee: number | null;
 }
@@ -30,6 +33,11 @@ export interface TicketFormUpdate {
   name: string;
   issue: string;
   status: boolean;
+  criticity: string;
   idCustomer: number;
   idEmployee: number | null;
+}
+
+export interface TicketCriticity {
+  criticity: string
 }
