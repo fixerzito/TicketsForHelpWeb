@@ -181,8 +181,8 @@ export const TicketsViewComponent: React.FC = () => {
                 display: 'flex',
                 marginBottom: '1vh',
                 flexDirection: 'row',
-                justifyContent: 'space-between', // 👈 joga os itens pros extremos
-                alignItems: 'center', // opcional, alinha verticalmente
+                justifyContent: 'space-between',
+                alignItems: 'center',
               }}
             >
               <h3 style={{ margin: 0, color: '#3f51b5' }}>

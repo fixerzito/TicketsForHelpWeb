@@ -130,7 +130,6 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
       className="p-0"
     >
       <div className="p-6 bg-white rounded-lg flex flex-col gap-8">
-        {/* ===== SEÇÃO 1 ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6 items-end">
           <div className="md:col-span-2">
             <label className="text-gray-600 font-medium mb-1 block">Título</label>
@@ -158,7 +157,6 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           </div>
         </div>
 
-        {/* ===== SEÇÃO 2 ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6">
           <div>
             <label className="text-gray-600 font-medium mb-1 block">Cliente</label>
@@ -197,7 +195,6 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           </div>
         </div>
 
-        {/* ===== SEÇÃO 3 ===== */}
         <div>
           <label className="text-gray-600 font-medium mb-1 block">Descrição</label>
           <InputTextarea
@@ -228,8 +225,6 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
             )}
           </div>
         </div>
-
-        {/* ===== FOOTER ===== */}
 
       </div>
     </Dialog>
