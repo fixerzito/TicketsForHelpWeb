@@ -220,6 +220,7 @@ export const TicketsViewComponent: React.FC = () => {
 
             <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.customer}</p>
             <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.employee ?? "Nenhum funcionário atribuído"}</p>
+            <p style={{ margin: '0.5rem 0', color: '#555' }}>{row.category ?? "Nenhuma categoria atribuída"}</p>
             <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
               <Button
                 icon="pi pi-pencil"

@@ -4,8 +4,9 @@ export interface Ticket {
   issue: string;
   status: boolean;
   criticity: string;
-  idCustomer: number;
-  idEmployee: number | null;
+  idCustomer: number | undefined;
+  idEmployee: number | undefined;
+  idCategory: number | undefined;
 }
 
 export interface TicketViewModel {
@@ -13,10 +14,12 @@ export interface TicketViewModel {
   name: string;
   status: boolean;
   criticity: string;
-  idCustomer: number;
-  customer?: string;
-  idEmployee: number | null;
+  idCustomer: number | undefined;
+  customer?: string | null;
+  idEmployee: number | undefined;
   employee?: string | null;
+  idCategory: number | undefined;
+  category?: string | null;
 }
 
 export interface TicketFormInsert {
@@ -24,8 +27,9 @@ export interface TicketFormInsert {
   issue: string;
   status: boolean;
   criticity: string;
-  idCustomer: number;
-  idEmployee: number | null;
+  idCustomer: number | undefined;
+  idEmployee: number | undefined;
+  idCategory: number | undefined;
 }
 
 export interface TicketFormUpdate {
@@ -34,8 +38,9 @@ export interface TicketFormUpdate {
   issue: string;
   status: boolean;
   criticity: string;
-  idCustomer: number;
-  idEmployee: number | null;
+  idCustomer: number | undefined;
+  idEmployee: number | undefined;
+  idCategory: number | undefined;
 }
 
 export interface TicketCriticity {

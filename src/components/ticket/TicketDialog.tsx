@@ -11,6 +11,8 @@ import { EmployeeDropdownViewModel } from '../../types/employee/Employee';
 import { employeeService } from '../../services/employee/employeeService';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { InputSwitch } from 'primereact/inputswitch';
+import { ticketCategoryService } from '../../services/ticket/ticketCategoryService';
+import { TicketCategoryViewModel } from '../../types/ticket/TicketCategory';
 
 interface TicketDialogProps {
   visible: boolean;
@@ -34,17 +36,20 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     status: true,
     criticity: '',
     idCustomer: 0,
-    idEmployee: null
+    idEmployee: undefined,
+    idCategory: undefined
   });
   const [saving, setSaving] = useState(false);
   const [customers, setCustomers] = useState<CustomerDropdownViewModel[]>([]);
   const [employees, setEmployees] = useState<EmployeeDropdownViewModel[]>([]);
+  const [categories, setCategories] = useState<TicketCategoryViewModel[]>([]);
   const [criticity, setCriticity] = useState<TicketCriticity[]>([])
 
   useEffect(() => {
     if (visible) {
       customerService.getallDropdown().then(setCustomers).catch(console.error);
       employeeService.getallDropdown().then(setEmployees).catch(console.error);
+      ticketCategoryService.getAll().then(setCategories).catch(console.error);
       ticketService.getCriticity().then(setCriticity).catch(console.error);
     }
   }, [visible]);
@@ -61,6 +66,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
             criticity: data.criticity,
             idCustomer: data.idCustomer,
             idEmployee: data.idEmployee,
+            idCategory: data.idCategory
           });
         })
         .catch(console.error);
@@ -72,13 +78,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
         status: true,
         criticity: '',
         idCustomer: 0,
-        idEmployee: null
+        idEmployee: undefined,
+        idCategory: undefined
       });
     }
   }, [ticketId, visible]);
 
   const handleChange = (field: keyof TicketFormInsert, value: any) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData({ ...formData!, [field]: value });
   };
 
   const handleSave = async () => {
@@ -87,14 +94,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
       return;
     }
 
-    if (!formData.name || !formData.issue || !formData.idCustomer) {
+    if (!formData!.name || !formData!.issue || !formData!.idCustomer) {
       alert('Preencha todos os campos!');
       return;
     }
 
     setSaving(true);
     try {
-      await onSave(formData);
+      await onSave(formData!);
       onHide();
     } catch (err: any) {
       alert('Erro ao salvar ticket: ' + (err.message || err));
@@ -134,7 +141,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           <div className="md:col-span-2">
             <label className="text-gray-600 font-medium mb-1 block">Título</label>
             <InputText
-              value={formData.name}
+              value={formData!.name}
               onChange={(e) => handleChange('name', e.target.value)}
               placeholder="Digite o título"
               disabled={viewMode}
@@ -144,16 +151,28 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           <div className="flex items-center justify-start md:justify-end gap-3 md:col-span-3">
             <label className="font-medium text-gray-600">Status:</label>
             <InputSwitch
-              checked={formData.status}
+              checked={formData!.status}
               onChange={(e) => handleChange('status', e.value)}
               disabled={viewMode}
             />
             <span
-              className={`text-sm font-semibold px-3 py-1 rounded-full ${formData.status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+              className={`text-sm font-semibold px-3 py-1 rounded-full ${formData!.status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                 }`}
             >
-              {formData.status ? 'Aberto' : 'Fechado'}
+              {formData!.status ? 'Aberto' : 'Fechado'}
             </span>
+          </div>
+
+          <div>
+            <label className="text-gray-600 font-medium mb-1 block">Categoria</label>
+            <Dropdown
+              value={formData!.idCategory}
+              options={categories.map((c) => ({ label: c.name, value: c.id }))}
+              onChange={(e) => handleChange('idCategory', e.value)}
+              placeholder="Selecione uma categoria"
+              disabled={viewMode}
+              className="w-full border-round-md"
+            />
           </div>
         </div>
 
@@ -161,7 +180,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           <div>
             <label className="text-gray-600 font-medium mb-1 block">Cliente</label>
             <Dropdown
-              value={formData.idCustomer}
+              value={formData!.idCustomer}
               options={customers.map((c) => ({ label: c.name, value: c.id }))}
               onChange={(e) => handleChange('idCustomer', e.value)}
               placeholder="Selecione um cliente"
@@ -173,7 +192,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           <div>
             <label className="text-gray-600 font-medium mb-1 block">Criticidade</label>
             <Dropdown
-              value={formData.criticity}
+              value={formData!.criticity}
               options={criticity.map((c) => ({ label: c, value: c }))}
               onChange={(e) => handleChange('criticity', e.value)}
               placeholder="Selecione a criticidade do ticket"
@@ -185,7 +204,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           <div>
             <label className="text-gray-600 font-medium mb-1 block">Colaborador</label>
             <Dropdown
-              value={formData.idEmployee}
+              value={formData!.idEmployee}
               options={employees.map((c) => ({ label: c.name, value: c.id }))}
               onChange={(e) => handleChange('idEmployee', e.value)}
               placeholder="Selecione um colaborador"
@@ -198,7 +217,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
         <div>
           <label className="text-gray-600 font-medium mb-1 block">Descrição</label>
           <InputTextarea
-            value={formData.issue}
+            value={formData!.issue}
             onChange={(e) => handleChange('issue', e.target.value)}
             placeholder="Descreva o problema..."
             disabled={viewMode}
