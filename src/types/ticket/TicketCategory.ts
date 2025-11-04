@@ -9,6 +9,7 @@ export interface TicketCategoryViewModel {
 }
 
 export interface TicketCategoryFormInsert {
+  id?:number,
   name: string;
 }
 

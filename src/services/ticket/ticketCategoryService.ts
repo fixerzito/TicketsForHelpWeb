@@ -19,6 +19,15 @@ export const ticketCategoryService = {
     return response.data;
   },
   delete: async (id: number): Promise<void> => {
-    await api.patch(`/ticket-categories/${id}`);
+    try {
+      await api.patch(`/ticket-categories/${id}`);
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        'Erro ao excluir categoria.';
+      throw new Error(errorMessage);
+    }
   }
 };

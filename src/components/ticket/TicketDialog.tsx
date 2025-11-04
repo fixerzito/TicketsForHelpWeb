@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
+import { Toast } from 'primereact/toast';
 import { ticketService } from '../../services/ticket/ticketService';
 import { customerService } from '../../services/customer/customerService';
 import { TicketCriticity, TicketFormInsert } from '../../types/ticket/Ticket';
@@ -12,7 +13,8 @@ import { employeeService } from '../../services/employee/employeeService';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { InputSwitch } from 'primereact/inputswitch';
 import { ticketCategoryService } from '../../services/ticket/ticketCategoryService';
-import { TicketCategoryViewModel } from '../../types/ticket/TicketCategory';
+import { TicketCategoryFormInsert, TicketCategoryViewModel } from '../../types/ticket/TicketCategory';
+import { TicketCategoryDialog } from './Category/TicketCategoryDialog';
 
 interface TicketDialogProps {
   visible: boolean;
@@ -40,10 +42,13 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     idCategory: undefined
   });
   const [saving, setSaving] = useState(false);
+  const [displayModal, setDisplayModal] = useState(false);
+  const [displayCategoryModal, setDisplayCategoryModal] = useState(false);
   const [customers, setCustomers] = useState<CustomerDropdownViewModel[]>([]);
   const [employees, setEmployees] = useState<EmployeeDropdownViewModel[]>([]);
   const [categories, setCategories] = useState<TicketCategoryViewModel[]>([]);
-  const [criticity, setCriticity] = useState<TicketCriticity[]>([])
+  const [criticity, setCriticity] = useState<TicketCriticity[]>([]);
+  const toast = useRef<Toast>(null);
 
   useEffect(() => {
     if (visible) {
@@ -110,6 +115,62 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     }
   };
 
+  const handleCreateCategory = async (category: TicketCategoryFormInsert) => {
+    try {
+      var created = await ticketCategoryService.insert(category);
+      setDisplayCategoryModal(false);
+      toast.current?.show({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Categoria criada com sucesso!',
+        life: 3000,
+      });
+
+      const updatedCategories = await ticketCategoryService.getAll();
+      setCategories(updatedCategories);
+      setFormData(prev => ({ ...prev, idCategory: created.id }));
+    } catch (err: any) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Erro',
+        detail: err.message || String(err),
+        life: 5000,
+      });
+    }
+  };
+
+  const handleDeleteCategory = async (id: number) => {
+    try {
+      await ticketCategoryService.delete(id);
+      const updated = await ticketCategoryService.getAll();
+      setCategories(updated);
+
+      toast.current?.show({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Categoria excluída com sucesso!',
+        life: 3000,
+      });
+    } catch (err: any) {
+      console.error("Erro ao excluir categoria:", err);
+
+      // Captura a mensagem real
+      const errorMessage =
+        err?.message || // já tratado no service
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        'Erro ao excluir categoria.';
+
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Erro',
+        detail: errorMessage,
+        life: 5000,
+      });
+    }
+  };
+
+
   return (
     <Dialog
       header={
@@ -128,14 +189,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
       visible={visible}
       style={{
         width: '80vw',
-        maxWidth: '1100px',
+        maxWidth: '1200px',
         borderRadius: '16px',
         backgroundColor: '#f9fafb',
         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
       }}
       onHide={onHide}
-      className="p-0"
     >
+      <Toast ref={toast} position="top-right" />
       <div className="p-6 bg-white rounded-lg flex flex-col gap-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6 items-end">
           <div className="md:col-span-2">
@@ -163,17 +224,48 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
             </span>
           </div>
 
-          <div>
-            <label className="text-gray-600 font-medium mb-1 block">Categoria</label>
-            <Dropdown
-              value={formData!.idCategory}
-              options={categories.map((c) => ({ label: c.name, value: c.id }))}
-              onChange={(e) => handleChange('idCategory', e.value)}
-              placeholder="Selecione uma categoria"
-              disabled={viewMode}
-              className="w-full border-round-md"
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ flex: 1 }}>
+              <label className="text-gray-600 font-medium mb-1 block">Categoria</label>
+              <Dropdown
+                value={formData!.idCategory}
+                options={categories}
+                optionLabel="name"
+                optionValue="id"
+                onChange={(e) => handleChange('idCategory', e.value)}
+                placeholder="Selecione uma categoria"
+                filter
+                filterPlaceholder="Buscar..."
+                disabled={viewMode}
+                className="w-full border-round-md"
+                itemTemplate={(option) => (
+                  <div className="flex items-center justify-between w-full">
+                    <span>{option.name}</span>
+                    <Button
+                      icon="pi pi-trash"
+                      className="p-button-text p-button-danger p-button-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCategory(option.id);
+                      }}
+                      tooltip="Excluir categoria"
+                    />
+                  </div>
+                )}
+              />
+            </div>
+
+            {!viewMode && (
+              <Button
+                icon="pi pi-plus"
+                className="p-button-rounded p-button-success"
+                onClick={() => setDisplayCategoryModal(true)}
+                tooltip="Adicionar nova categoria"
+              />
+            )}
           </div>
+
+
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6">
@@ -246,7 +338,16 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
         </div>
 
       </div>
+
+      <TicketCategoryDialog
+        visible={displayCategoryModal}
+        onHide={() => setDisplayCategoryModal(false)}
+        onSave={handleCreateCategory}
+        viewMode={viewMode}
+      />
+
     </Dialog>
+
   );
 
 
