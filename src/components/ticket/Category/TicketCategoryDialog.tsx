@@ -48,7 +48,7 @@ export const TicketCategoryDialog: React.FC<TicketCategoryDialogProps> = ({
 
     setSaving(true);
     try {
-      await onSave(formData);
+      onSave(formData);
       onHide();
     } catch (err: any) {
       alert('Erro ao salvar categoria: ' + (err.message || err));

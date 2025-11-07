@@ -15,6 +15,11 @@ import { InputSwitch } from 'primereact/inputswitch';
 import { ticketCategoryService } from '../../services/ticket/ticketCategoryService';
 import { TicketCategoryFormInsert, TicketCategoryViewModel } from '../../types/ticket/TicketCategory';
 import { TicketCategoryDialog } from './Category/TicketCategoryDialog';
+import { Editor } from 'primereact/editor';
+import { WorkLogDialog } from './WorkLog/WorkLogDialog';
+import { WorkLogCardView, WorkLogFormInsert } from '../../types/ticket/WorkLog';
+import { workLogService } from '../../services/ticket/workLogService';
+import { Card } from 'primereact/card';
 
 interface TicketDialogProps {
   visible: boolean;
@@ -44,6 +49,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
   const [saving, setSaving] = useState(false);
   const [displayModal, setDisplayModal] = useState(false);
   const [displayCategoryModal, setDisplayCategoryModal] = useState(false);
+  const [displayWorkLogModal, setDisplayWorkLogModal] = useState(false);
+  const [workLogs, setWorkLogs] = useState<WorkLogCardView[]>([]);
   const [customers, setCustomers] = useState<CustomerDropdownViewModel[]>([]);
   const [employees, setEmployees] = useState<EmployeeDropdownViewModel[]>([]);
   const [categories, setCategories] = useState<TicketCategoryViewModel[]>([]);
@@ -56,6 +63,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
       employeeService.getallDropdown().then(setEmployees).catch(console.error);
       ticketCategoryService.getAll().then(setCategories).catch(console.error);
       ticketService.getCriticity().then(setCriticity).catch(console.error);
+      workLogService.GetByTicketId(ticketId!).then(setWorkLogs).catch(console.error)
     }
   }, [visible]);
 
@@ -139,6 +147,26 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     }
   };
 
+  const handleCreateWorkLog = async (workLog: WorkLogFormInsert) => {
+    try {
+      var created = await workLogService.insert(workLog);
+      setDisplayWorkLogModal(false);
+      toast.current?.show({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Apontamento registrado!',
+        life: 2000,
+      });
+    } catch (err: any) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Erro',
+        detail: err.message || String(err),
+        life: 5000,
+      });
+    }
+  };
+
   const handleDeleteCategory = async (id: number) => {
     try {
       await ticketCategoryService.delete(id);
@@ -154,9 +182,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     } catch (err: any) {
       console.error("Erro ao excluir categoria:", err);
 
-      // Captura a mensagem real
       const errorMessage =
-        err?.message || // já tratado no service
+        err?.message ||
         err?.response?.data?.error ||
         err?.response?.data?.message ||
         'Erro ao excluir categoria.';
@@ -306,6 +333,22 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           </div>
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ flex: 1 }}>
+            <label className="text-gray-600 font-medium mb-1 block">Registrar atuação</label>
+
+          </div>
+
+          {!viewMode && (
+            <Button
+              icon="pi pi-plus"
+              className="p-button-rounded p-button-success"
+              onClick={() => setDisplayWorkLogModal(true)}
+              tooltip="+"
+            />
+          )}
+        </div>
+
         <div>
           <label className="text-gray-600 font-medium mb-1 block">Descrição</label>
           <InputTextarea
@@ -317,6 +360,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
             rows={8}
             autoResize
           />
+
+
 
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button
@@ -337,12 +382,46 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
           </div>
         </div>
 
+        {workLogs.map((row) => (
+          <Card
+            className="p-shadow-2"
+            style={{
+              borderRadius: '10px',
+              padding: '1rem',
+              cursor: 'pointer',
+              transition: 'transform 0.1s ease-in-out',
+            }}
+            // onClick={() => {
+            //   setEditingTicket(row);
+            //   setViewMode(true);
+            //   setDisplayModal(true);
+            // }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+            <p className="m-0">
+              {row.hoursWorked}
+            </p>
+          </Card>
+        ))}
+
       </div>
 
       <TicketCategoryDialog
         visible={displayCategoryModal}
         onHide={() => setDisplayCategoryModal(false)}
         onSave={handleCreateCategory}
+        viewMode={viewMode}
+      />
+
+      <WorkLogDialog
+        visible={displayWorkLogModal}
+        onHide={() => setDisplayWorkLogModal(false)}
+        ticket={{
+          id: formData.id!,
+          employeeId: formData.idEmployee!
+        }}
+        onSave={handleCreateWorkLog}
         viewMode={viewMode}
       />
 
